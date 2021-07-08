@@ -1,0 +1,4 @@
+export default {
+  partOne: 'Welcome Adventurer! Your story is just beginning in the world of Dungeons and Dragons. Before setting off on your quest you need to create your character. To help set the mood I’ve created a story to help manifest your hidden character waiting to venture forth. Behold! Before lies the toughest tarven in all the land The Salty Spitoon! Only the strongest adventurers may enter or be turned away to the tarven of Weenie Hut Jr, but wait! What class do you possess that may enter such an establishment? And do you have enough strength to open these heavy doors?',
+  PartTwo:''
+}
