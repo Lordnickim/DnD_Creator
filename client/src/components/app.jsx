@@ -5,6 +5,14 @@ import IntroContainer from './introContainer.jsx';
 import OutroContainer from './outroContainer.jsx';
 import script from './script.js';
 import formValues from './formValues.js';
+import audio from '../../dist/LEZ.mp3';
+
+const AppStyle = styled.div`
+  background-color: black;
+  color: green;
+  font-family: 'decterm';
+  font-size: large;
+`
 
 const App = () => {
   const [ isLoading, setIsLoading ] = useState(false);
@@ -26,6 +34,7 @@ const App = () => {
   const [ isStageFiveDone, setStageFiveDone ] = useState(false);
   const [ isStageSixDone, setStageSixDone ] = useState(false);
   const [ scriptAdd, setScriptAdd ] = useState(false);
+  const [ characterData, setCharacterData ] =useState([]);
 
   // role 4d6 and pick highest 3 values
   const getRollValue = () => {
@@ -42,9 +51,46 @@ const App = () => {
   }
 
   // Converts base stat to Modifier value
-
+  const getModValue = (stat) => {
+    return Math.floor((stat - 10) / 2 )
+  }
+  // Add Modifier value to base stat by race
+  const addRaceModifier = (race) => {
+    if(race === 'Dwarf') {
+      setStrengthStat(strengthStat + 2)
+    } else if(race === 'Elf'){
+      setDexStat(dexStat + 2)
+    } else if(race === 'Halfling'){
+      setDexStat(dexStat + 2)
+    } else if(race === 'Human'){
+      setDexStat(dexStat+1)
+      setIntelStat(intelStat+1)
+      setStrengthStat(strengthStat+1)
+      setWisdomStat(wisdomStat+1)
+      setConstStat(constStat+1)
+      setCharStat(charStat+1)
+    } else if(race === 'Dragonborn'){
+      setStrengthStat(strengthStat+2)
+      setCharStat(charStat+1)
+    } else if(race === 'Half-Elf'){
+      setStrengthStat(strengthStat+2)
+      setDexStat(dexStat+1)
+      setIntelStat(intelStat+1)
+    } else if(race === 'Half-Orc'){
+      setStrengthStat(strengthStat+2)
+      setConstStat(constStat+1)
+    } else if(race === 'Tiefling'){
+      setIntelStat(intelStat+1)
+      setCharStat(charStat+2)
+    } else if(race === 'Gnome'){
+      setIntelStat(intelStat+2)
+    }
+  }
   // Axios Get request on Roles
-
+  const getApiData = async (role, value) => {
+    const rawData = await axios.get(`/${role}/${value}`);
+    setCharacterData([...characterData, rawData.data]);
+  }
 
   //script results
   let PartOneA = `Oh a ${classRole}, a most interesting class! The guard at the Salty Spitoon is most impressed at your ease of handling the door thanks to your Strength of ${strengthStat}. You enter the Salty Spitoon`;
@@ -88,8 +134,20 @@ const App = () => {
     }
   },[alignRole])
 
+  useEffect(() => {
+    addRaceModifier(raceRole);
+  },[raceRole])
+
   return (
-    <React.Fragment>
+    <AppStyle>
+      <audio
+        useref="audio_tag"
+        controls={true}
+        loop={true}
+        autoPlay={true}>
+        <source type="audio/mp3" src={audio} />
+      </audio>
+      <br/>
       {
         (isStageOneDone ?
           <OutroContainer
@@ -104,6 +162,7 @@ const App = () => {
           setStat={setStrengthStat}
           setRole={setClassRole}
           setStageDone={setStageOneDone}
+          getApiData={getApiData}
           />)
       }
       <br/>
@@ -120,6 +179,7 @@ const App = () => {
           setStat={setWisdomStat}
           setRole={setRaceRole}
           setStageDone={setStageTwoDone}
+          getApiData={getApiData}
           />)}
       <br/>
     {(isStageThreeDone ?
@@ -180,16 +240,58 @@ const App = () => {
           setStageDone={setStageSixDone}
           />)}
       <br/>
-      {(isLoading ?
-      <React.Fragment/>
-      : <div>
+      {<AppStyle>
         <h2>Character Sheet</h2>
         <h3>Character Name: {nameRole}</h3>
         <h3>Level 1</h3>
         <h3>Class: {classRole}</h3>
-      </div>)}
-    </React.Fragment>
+        <h3>Race: {raceRole}</h3>
+        <h3>Alignment: {alignRole}</h3>
+        <h3>Background: {backgroundRole}</h3>
+        <h3>Strength:{strengthStat} MOD:{getModValue(strengthStat)}</h3>
+        <h3>Wisdom:{wisdomStat} MOD:{getModValue(wisdomStat)}</h3>
+        <h3>Charisma:{charStat} MOD:{getModValue(charStat)}</h3>
+        <h3>Dexterity:{dexStat} MOD:{getModValue(dexStat)}</h3>
+        <h3>Intelligence:{intelStat} MOD:{getModValue(intelStat)}</h3>
+        <h3>Constitution:{constStat} MOD:{getModValue(constStat)}</h3>
+        <h3>Proficiencies</h3>
+        {console.log(characterData)}
+        {characterData.length > 0 ? characterData[0]["proficiencies"].map(entry => {
+          return <h2>{entry.name}</h2>
+        })
+        : ''}
+        <h3>Starting Equipment</h3>
+        {console.log(characterData)}
+        {characterData.length > 0 ? characterData[0]["starting_equipment"].map(entry => {
+          return <h2>{entry.equipment.name} -Quantity{entry.quantity}</h2>
+        })
+        : ''}
+        <h3>Equipment Choice</h3>
+        {characterData.length > 0 ?
+        characterData[0]["starting_equipment_options"].map(entry => {
+          return(
+            <div>
+              <h2>Choose{entry.choose}</h2>
+              {entry.from.map(inner => {
+                if(inner["equipment_option"] || inner["equipment_category"]) {
+                  return
+                } else if(inner["0"]){
+                  return (
+                    <div>
+                      <h2>{inner["0"].equipment.name} -Quantity{inner["0"].quantity}</h2>
+                    </div>
+                  )
+                } else {
+                  return <h2>{inner.equipment.name} -Quantity{inner.quantity}</h2>
+                }
+              })}
+            </div>
+          )
+        })
+        : ''}
+      </AppStyle>}
+    </AppStyle>
   )
-}
+} //entry.from[0].equipment.name
 
 export default App;

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 
-export default function introContainer({script,formValues,form,stat,rollFunc,setStat,setRole,setStageDone}) {
+export default function introContainer({script,formValues,form,stat,rollFunc,setStat,setRole,setStageDone,getApiData}) {
 
   let initialState = null;
   if(formValues.length === 0) {
@@ -19,15 +19,18 @@ export default function introContainer({script,formValues,form,stat,rollFunc,set
     if(stat==='Constitution'){
       setStat(rollFunc());
       setStageDone(true);
+    } else if (form === 'Class' || form === 'Race'){
+      setRole(name);
+      setStat(rollFunc());
+      setStageDone(true);
+      getApiData(form,name);
     } else {
       setRole(name);
       setStat(rollFunc());
       setStageDone(true);
     }
-    //ax
-  }
 
-  //axios request?
+  }
 
   if(form === 'Name') {
   return(

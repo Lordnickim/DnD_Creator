@@ -37,7 +37,22 @@ const config = {
           'css-loader',
           'sass-loader'
         ]
+      },
+      {
+        test: /\.mp3$/,
+        loader: 'file-loader'
+    },
+    {
+      test: /\.(eot|ttf|woff|otf|woff2)$/,
+      use: {
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]',
+          publicPath: 'fonts',
+          outputPath: 'fonts',
+        }
       }
+    }
     ]
   },
   resolve: {

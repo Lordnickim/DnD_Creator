@@ -12,6 +12,9 @@
         "ssr": true,
         "preprocess": false
       }
+    ],
+    [
+      "@babel/plugin-transform-runtime"
     ]
   ]
 }
